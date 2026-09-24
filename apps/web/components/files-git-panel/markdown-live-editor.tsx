@@ -8,6 +8,8 @@ import { basicSetup } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { markdownLivePreview } from './cm-markdown-live';
+import { markdownLinkOpener } from './cm-markdown-links';
+import { markdownPaste } from './cm-markdown-paste';
 import { SCROLL_PERSIST_MS, scrollToAnchor, topAnchor } from './cm-scroll';
 import { CM_SCROLLBAR_FIREFOX, CM_SCROLLBAR_WEBKIT, PANEL_BG } from './styles';
 import { resolvedThemeNow, useIsDarkTheme } from '@/lib/hooks/use-resolved-theme';
@@ -50,8 +52,9 @@ const syntaxTheme = (dark: boolean) => (dark ? oneDark : []);
 
 const baseTheme = EditorView.theme({
   '&': { height: '100%', fontSize: '13px', backgroundColor: PANEL_BG },
-  // A document-scale reading column, not a code gutter, for the "formatted" feel.
-  '.cm-content': { maxWidth: '820px', padding: '10px 20px 40px' },  // margin: '0 auto', to make the markdown content central algined. 
+  // Full panel width, like the source editor and the read-only preview it
+  // toggles against — the panel is the user's reading column, and they size it.
+  '.cm-content': { padding: '10px 20px 40px' },
   '.cm-scroller': {
     fontFamily: 'var(--font-mono, ui-sans-serif, system-ui, sans-serif)',
     lineHeight: '1.7',
@@ -129,6 +132,11 @@ export function MarkdownLiveEditor({
           // the live layer renders/styles them.
           markdown({ base: markdownLanguage }),
           markdownLivePreview(),
+          // ⌘/Ctrl+click a link to open it in the browser; a plain click
+          // still places the cursor (which reveals the link's markdown).
+          markdownLinkOpener(),
+          // Rich text on the clipboard arrives as markdown, not as bare words.
+          markdownPaste(),
           wrapComp.current.of(wrap ? EditorView.lineWrapping : []),
           updateListener,
         ],
