@@ -5,6 +5,16 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.5
+24 September, 2026
+- Fix a session started with `vicoa session start`, or by another agent, never being linked to a machine — which left it without a terminal, a Changes or files panel, a branch badge or file search, for the life of the session; the link is now stamped when the session is staged, and the daemon fills in a missing one when the session registers, so sessions staged by an older client are covered too
+- An agent installed by its own install script is now found where that script puts it — `~/.opencode/bin/opencode` and the same convention for any other tool — instead of reading as "not installed" on a machine where `which opencode` plainly works, because the installer only edits shell startup files the daemon never reads
+- Change a share link's audience, expiry, what it shows, or which of tasks and sessions it covers, without minting a new URL — every copy already sent out keeps working, which is the one thing a share link exists for
+- Fix anyone signed in who knew a project share link's id being able to revoke it
+- Fix notification emails pointing at a session address that has never existed, so "You can respond at" and "You can view the full session at" both landed on a 404
+- Fix a session that is still running being filed as finished after seven days with no message — a long rate-limit wait no longer ends it
+- The `vicoa-cli` agent skill now ships with the CLI in `skills/`, so a coding agent can be taught to drive Vicoa from the repo itself; it covers `session start|share|unshare`, the project and label groups, task labels and `worktree setup`, with install notes for Claude Code and other agents in `skills/README.md`
+
 ### v1.9.4
 22 September, 2026
 - `vicoa project ls|get` and `vicoa label ls|create` — your projects and your label vocabulary are finally readable from the terminal, with open-task counts and the same colours the app picks
