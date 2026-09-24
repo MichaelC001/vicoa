@@ -5,6 +5,20 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.31
+24 September, 2026
+- Bundle Vicoa CLI daemon [v1.9.5](/docs/changelog/vicoa-cli#v195)
+- Linux gets the app's own title bar, so the window no longer wears two of them plus Chromium's menu bar — the logo, the application-menu button and the min/max/close cluster are drawn by the app, Alt still reveals the native menu, and Settings -> Appearance -> Window -> Title bar -> System hands the frame back to your desktop if you would rather it drew its own
+- Edit a markdown table in the grid instead of in its pipes — type straight into a cell, Tab and the arrows walk between cells and rows, your hand-aligned spacing survives, and Escape drops back into the markdown on the same character for the things a grid cannot express
+- The markdown editor follows links on Cmd/Ctrl+click, with the link underlining itself while the key is held; pasting from a web page now keeps its links, headings and tables as markdown rather than flattening them to plain text
+- Front matter at the top of a markdown file reads as a quiet metadata block instead of a stray divider, a click on a table lands in the cell you clicked, and the editor uses the panel's full width rather than stopping mid-pane
+- Sessions live at their own address now — `/dashboard/sessions/<id>`, with `/dashboard/sessions/new` for a new one — leaving `/dashboard/agents` to the saved agent presets it was named for; old links, bookmarks and notifications keep working
+- "Open" on a session card in a task's timeline opens that session, rather than dropping you on the dashboard's "start a session" home
+- A share link's "Settings" edits the link you already sent — audience, expiry, what it shows, what it covers — with "New link" still there for when a fresh URL is the point
+- Onboarding shows every built-in agent on the intro strip, and the agent-scan list scrolls with the app's own scrollbar
+- Fix a session that is still running being marked finished after seven idle days, which could end a session part-way through a long rate-limit wait
+- Fix OpenCode reading as not installed when it was installed with its own installer
+
 ### v0.1.30
 22 September, 2026
 - Bundle Vicoa CLI daemon [v1.9.4](/docs/changelog/vicoa-cli#v194)
