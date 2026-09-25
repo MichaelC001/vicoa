@@ -89,6 +89,7 @@ export function Footer() {
               <li><a href="/vs/conductor" className="hover:text-blue-400 transition-colors">Vicoa vs Conductor</a></li>
               <li><a href="/vs/claude-code-remote-control" className="hover:text-blue-400 transition-colors">Vicoa vs Claude Code Remote</a></li>
               <li><a href="/vs/superset" className="hover:text-blue-400 transition-colors">Vicoa vs Superset.sh</a></li>
+              <li><a href="/vs/paseo" className="hover:text-blue-400 transition-colors">Vicoa vs Paseo</a></li>
             </ul>
           </div>
 
