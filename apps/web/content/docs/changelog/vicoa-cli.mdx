@@ -5,6 +5,10 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.6
+26 September, 2026
+- Claude Opus 5.5 can be picked for a Claude session like any other model, with its full 1M context window
+
 ### v1.9.5
 24 September, 2026
 - Fix a session started with `vicoa session start`, or by another agent, never being linked to a machine — which left it without a terminal, a Changes or files panel, a branch badge or file search, for the life of the session; the link is now stamped when the session is staged, and the daemon fills in a missing one when the session registers, so sessions staged by an older client are covered too
