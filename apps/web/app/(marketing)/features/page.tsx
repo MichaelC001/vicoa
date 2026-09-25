@@ -3,6 +3,7 @@ import Image from 'next/image';
 import {
   ListChecks,
   CalendarClock,
+  Hash,
   Search,
   SquarePen,
   SquareTerminal,
@@ -192,6 +193,16 @@ const cardFeatures: CardFeature[] = [
       'Open the command palette with ⌘K',
       'Search across your whole workspace in an instant',
       'A commands tier for quick actions'
+    ]
+  },
+  {
+    icon: <Hash className="h-8 w-8" />,
+    title: 'Reference Sessions & Tasks',
+    description: 'Hand an agent another session, a task, or an automation with #.',
+    details: [
+      'Type # in the message box to pick a running session, a task, or an automation',
+      'The agent gets the details inline',
+      'Reference a task and the session will link to it'
     ]
   },
   {
