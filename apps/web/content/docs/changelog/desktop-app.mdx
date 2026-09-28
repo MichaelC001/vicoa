@@ -5,6 +5,19 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.33
+29 September, 2026
+- Bundle Vicoa CLI daemon [v1.9.7](/docs/changelog/vicoa-cli#v197)
+- Share a project or a session with specific people, not only by link: the Share dialog has a new People tab where you invite by email or pick a team, give a role (Viewer, Commenter, Editor or Admin) and choose whether they see the tasks, the sessions or both
+- Settings → Teams lets you create a team and invite people by email or with an invite link; an invitation shows up in the invitee's account menu with Join and Decline
+- Anything shared with you appears under Shared with me in the sidebar, and a shared session opens read-only and refreshes on its own
+- With a project selected, the Tasks page shows who it is shared with next to Share
+- A "+" on the sidebar's Workspaces header starts a new session, and an empty sidebar now tells you how to get going
+- Join Discord straight from the account menu
+- Auto mode is offered for every Claude model, including older ones like Opus 4.6
+- Fix the transcript flickering between two scroll positions when a long message or an agent's question sat near the edge of the view
+- Fix deleting a clean worktree failing with a submodule error in a repo whose submodules were never checked out there
+
 ### v0.1.32
 26 September, 2026
 - Bundle Vicoa CLI daemon [v1.9.6](/docs/changelog/vicoa-cli#v196)
