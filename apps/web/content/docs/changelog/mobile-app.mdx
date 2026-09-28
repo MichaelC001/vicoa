@@ -5,6 +5,14 @@ description: Release notes for the Vicoa iOS and Android apps — new features, 
 
 # Mobile App
 
+### v1.7.12
+29 September, 2026
+- Remove a worktree even while a session is running in it: its running sessions are archived first, and the branch is kept so your commits stay safe
+- Fix removing a worktree failing when the worktree list was opened from inside that worktree; an error there now stays on screen long enough to read
+- Claude Opus 5.5 joins the model picker
+- Auto mode is offered for every Claude model, including older ones like Opus 4.6
+- Fix the home screen stopping short of older sessions while a status filter was on; it now loads 50 at a time and keeps going to the end
+
 ### v1.7.11
 24 September, 2026
 - Share a session with a live link, not just a copy of it — one tap creates the link, copies it and opens the share sheet, and it keeps updating as the session runs until you revoke it; who can open it, when it expires and whether your name and branch names show are in Link settings, and the old pick-the-messages export is still there under Export
