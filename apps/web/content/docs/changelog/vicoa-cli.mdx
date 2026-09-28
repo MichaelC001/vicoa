@@ -5,6 +5,15 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.7
+29 September, 2026
+- Share a project or a single session with specific people by email, or with a whole team, not only by link; someone without an account gets the access when they sign up with that address
+- Fix Windows sessions dying before they started when the daemon was launched from the CLI, which left the session marked failed with only "exited with code 3221225794" to go on; a failed launch now names the Windows error instead of saying "please try again"
+- Every id the CLI prints is now the full id, and commands and agent tools take only a full id, so an id copied from `vicoa session ls` can never end up naming a different session or failing when an agent passes it on
+- Auto mode is offered for every Claude model, including older ones like Opus 4.6
+- Fix deleting a clean worktree failing with "working trees containing submodules cannot be moved or removed" in a repo whose submodules were never checked out there
+- Fix deleting a worktree failing when the request came from inside that worktree or one of its folders
+
 ### v1.9.6
 26 September, 2026
 - Claude Opus 5.5 can be picked for a Claude session like any other model, with its full 1M context window
