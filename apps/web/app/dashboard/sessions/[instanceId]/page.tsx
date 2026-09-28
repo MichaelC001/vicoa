@@ -210,6 +210,13 @@ function AgentInstanceContent() {
     () => (storeEntry?.instance ? { ...storeEntry.instance, messages: storeEntry.messages } : null),
     [storeEntry],
   );
+  // Someone else's session opens in the read-only viewer, not here: this page
+  // drives the owner's daemon (terminal, files, git, resume) and has a
+  // composer. The capability-degraded version of it is P6 (§8.2).
+  const openedAsGrantee = instance?.is_owner === false;
+  useEffect(() => {
+    if (openedAsGrantee) router.replace(`/dashboard/shared/sessions/${instanceId}`);
+  }, [openedAsGrantee, instanceId, router]);
   const sessionAgentProfile = instance?.agent_profile_id
     ? (agentProfilesById.get(instance.agent_profile_id) ?? null)
     : null;
@@ -2778,7 +2785,12 @@ function AgentInstanceContent() {
         onOpenChange={setShareOpen}
         target={
           instance
-            ? { kind: 'session', instanceId: instance.id, title: instance.name || 'Untitled session' }
+            ? {
+                kind: 'session',
+                instanceId: instance.id,
+                title: instance.name || 'Untitled session',
+                projectId: instance.project_id ?? null,
+              }
             : null
         }
       />
