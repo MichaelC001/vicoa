@@ -276,6 +276,36 @@ class ProjectPosition(Base):
     position: Mapped[int] = mapped_column(Integer)
 
 
+class ProjectFollow(Base):
+    """A user following a project someone else shared with them.
+
+    Shared projects start out under the sidebar's "Shared with me"; following
+    one lists it among the user's own projects, other people's sessions in it
+    under its Team row. Per user, like `ProjectPosition`, and separate from
+    it: the order table is rewritten whole on every drag, and following must
+    survive a reorder. A user's own projects never need a row. Rows cascade with the user and the project; one
+    left behind after access ends is inert, because the list only honours it
+    for a project the viewer can still see.
+    """
+
+    __tablename__ = "project_follows"
+    __table_args__ = (Index("ix_project_follows_project", "project_id"),)
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        type_=PostgresUUID(as_uuid=True),
+        primary_key=True,
+    )
+    project_id: Mapped[UUID] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        type_=PostgresUUID(as_uuid=True),
+        primary_key=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow
+    )
+
+
 class TaskLabel(Base):
     """Label vocabulary (multica issue_label).
 

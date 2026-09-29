@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AgentInstanceResponse, PrincipalResponse, ProjectResponse } from './backend-api';
-import { groupSharedWithMe } from './shared-with-me';
+import { canFollowProject, groupSharedWithMe, isFollowedSharedProject } from './shared-with-me';
 
 const ada: PrincipalResponse = {
   type: 'user',
@@ -86,5 +86,41 @@ describe('groupSharedWithMe', () => {
       ['owner:ada', 'Ada', ['s1', 's3']],
       ['owner:bo', 'Bo', ['s2']],
     ]);
+  });
+
+  it('leaves out a project added to the sidebar, sessions and all', () => {
+    const groups = groupSharedWithMe(
+      [session('s1', 'added'), session('s2', 'alpha')],
+      [project('added', { followed: true }), project('alpha')],
+    );
+    expect(groups.map((g) => [g.key, g.instances.map((i) => i.id)])).toEqual([
+      ['alpha', ['s2']],
+    ]);
+  });
+
+  it("leaves out a collaborator's session in a project of my own", () => {
+    // It sits under that project's Team row, not under its author's name.
+    const groups = groupSharedWithMe(
+      [session('s1', 'mine'), session('s2', 'alpha')],
+      [project('mine', { owner: null }), project('alpha')],
+    );
+    expect(groups.map((g) => [g.key, g.instances.map((i) => i.id)])).toEqual([
+      ['alpha', ['s2']],
+    ]);
+  });
+});
+
+describe('sidebar membership of shared projects', () => {
+  it('is added only when the server says so', () => {
+    expect(isFollowedSharedProject(project('p', { followed: true }))).toBe(true);
+    expect(isFollowedSharedProject(project('p'))).toBe(false);
+    // Your own project is not "added" — it is simply yours.
+    expect(isFollowedSharedProject(project('p', { owner: null, followed: true }))).toBe(false);
+  });
+
+  it('can be added only with the sessions scope', () => {
+    expect(canFollowProject(project('p'))).toBe(true);
+    expect(canFollowProject(project('p', { scopes: ['tasks'] }))).toBe(false);
+    expect(canFollowProject(project('p', { owner: null }))).toBe(false);
   });
 });

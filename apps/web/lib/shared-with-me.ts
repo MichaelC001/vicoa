@@ -12,6 +12,11 @@
  *
  * A session shared on its own (no grant on its project) has no visible
  * project to sit under, so those gather under their owner instead.
+ *
+ * A shared project the user follows ("Add to sidebar") leaves this group,
+ * sessions and all: it is listed among their own projects instead, its
+ * sessions under the project's Team row. So do other people's sessions in a
+ * project the user owns (a collaborator's, filed there by its remote).
  */
 
 import type { AgentInstanceResponse, PrincipalResponse, ProjectResponse } from './backend-api';
@@ -30,14 +35,38 @@ export function isSharedProject(project: ProjectResponse): boolean {
   return project.owner != null && !project.is_archived;
 }
 
+/** A shared project the user follows into their own list (`followed`). */
+export function isFollowedSharedProject(project: ProjectResponse): boolean {
+  return isSharedProject(project) && project.followed === true;
+}
+
+/**
+ * Whether following means anything for this project ("Add to sidebar"): the
+ * sidebar lists a project by its sessions, so a board-only grant has nothing
+ * to show there.
+ */
+export function canFollowProject(project: ProjectResponse): boolean {
+  return isSharedProject(project) && (project.scopes?.includes('sessions') ?? false);
+}
+
 export function groupSharedWithMe(
   instances: AgentInstanceResponse[],
   projects: Iterable<ProjectResponse>,
 ): SharedGroup[] {
   const groups: SharedGroup[] = [];
   const byProject = new Map<string, SharedGroup>();
+  // Projects the sidebar lists as the user's own; their sessions sit there.
+  const listed = new Set<string>();
   for (const project of projects) {
+    if (!project.owner) {
+      listed.add(project.id);
+      continue;
+    }
     if (!isSharedProject(project)) continue;
+    if (isFollowedSharedProject(project)) {
+      listed.add(project.id);
+      continue;
+    }
     const group: SharedGroup = {
       key: project.id,
       kind: 'project',
@@ -52,6 +81,7 @@ export function groupSharedWithMe(
 
   const byOwner = new Map<string, SharedGroup>();
   for (const instance of instances) {
+    if (instance.project_id && listed.has(instance.project_id)) continue;
     const projectGroup = instance.project_id ? byProject.get(instance.project_id) : undefined;
     if (projectGroup) {
       projectGroup.instances.push(instance);

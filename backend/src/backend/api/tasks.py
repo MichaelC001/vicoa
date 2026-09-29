@@ -116,12 +116,14 @@ def list_projects_endpoint(
         ):
             background_tasks.add_task(project_icons.seed_project_icon, project.id)
     owners = _project_owners(db, current_user.id, projects)
+    followed = task_queries.followed_project_ids(db, current_user.id, list(owners))
     return [
         _project_response(
             p,
             accesses.get(p.id),
             viewer_id=current_user.id,
             owner=owners.get(p.id),
+            followed=p.id not in owners or p.id in followed,
             last_activity_at=last_at,
             position=position,
         )
@@ -154,6 +156,7 @@ def _project_response(
     *,
     viewer_id: UUID,
     owner: PrincipalResponse | None = None,
+    followed: bool | None = None,
     last_activity_at: datetime | None = None,
     position: int | None = None,
 ) -> ProjectResponse:
@@ -179,6 +182,9 @@ def _project_response(
     mine = {d.machine_id for d in project.directories if d.user_id == viewer_id}
     response.directories = [d for d in response.directories if d.machine_id in mine]
     response.owner = owner
+    # Unknown to a caller that did not look it up: an owned project is always
+    # listed, a shared one only when the list query says it is followed.
+    response.followed = owner is None if followed is None else followed
     response.last_activity_at = last_activity_at
     response.position = position
     return response
@@ -242,12 +248,56 @@ def _project_response_for(
     The list endpoint batches this with `access.project_accesses`; everything
     that returns one project uses this.
     """
+    owner = _project_owners(db, user_id, [project]).get(project.id)
     return _project_response(
         project,
         access.project_access(db, user_id, project),
         viewer_id=user_id,
-        owner=_project_owners(db, user_id, [project]).get(project.id),
+        owner=owner,
+        followed=owner is None
+        or bool(task_queries.followed_project_ids(db, user_id, [project.id])),
     )
+
+
+def _set_followed(
+    db: Session, user_id: UUID, project_id: UUID, *, followed: bool
+) -> ProjectResponse:
+    # Any standing that can see the project: this is the caller's own view,
+    # like the project order. (A board-only grantee has no sessions to show
+    # there, so the client only offers it with the sessions scope.)
+    project = task_queries.get_accessible_project(db, user_id, project_id, sharing=True)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
+        )
+    owned = project.team_id is None and project.user_id == user_id
+    if not owned:
+        task_queries.set_project_followed(db, user_id, project.id, followed=followed)
+    return _project_response_for(db, user_id, project)
+
+
+@router.put("/projects/{project_id}/follow", response_model=ProjectResponse)
+def follow_project_endpoint(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ProjectResponse:
+    """Follow a project shared with the caller into their own list: it
+    leaves "Shared with me" for their project list, other people's sessions
+    in it under its Team row. The caller's view only — the project itself is
+    untouched, so any role that can see it may do it. A no-op for one they
+    own."""
+    return _set_followed(db, current_user.id, project_id, followed=True)
+
+
+@router.delete("/projects/{project_id}/follow", response_model=ProjectResponse)
+def unfollow_project_endpoint(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ProjectResponse:
+    """Undo `PUT …/follow`: back under "Shared with me". Access unchanged."""
+    return _set_followed(db, current_user.id, project_id, followed=False)
 
 
 @router.post(

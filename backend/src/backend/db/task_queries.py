@@ -47,6 +47,7 @@ from shared.database import (
     Project,
     ProjectDirectory,
     ProjectPosition,
+    ProjectFollow,
     Task,
     TaskActivity,
     TaskComment,
@@ -319,6 +320,39 @@ def set_project_order(
     )
     db.commit()
     return kept
+
+
+def followed_project_ids(
+    db: Session, user_id: UUID, project_ids: Sequence[UUID]
+) -> set[UUID]:
+    """Which of these projects the user follows into their own list."""
+    if not project_ids:
+        return set()
+    return {
+        row[0]
+        for row in db.execute(
+            select(ProjectFollow.project_id).where(
+                ProjectFollow.user_id == user_id,
+                ProjectFollow.project_id.in_(list(project_ids)),
+            )
+        )
+    }
+
+
+def set_project_followed(
+    db: Session, user_id: UUID, project_id: UUID, *, followed: bool
+) -> None:
+    """Follow a shared project into the user's own list, or unfollow it.
+
+    Idempotent both ways. The caller has already resolved the project as
+    visible; this only records the user's choice, never touches the project.
+    """
+    existing = db.get(ProjectFollow, (user_id, project_id))
+    if followed and existing is None:
+        db.add(ProjectFollow(user_id=user_id, project_id=project_id))
+    elif not followed and existing is not None:
+        db.delete(existing)
+    db.commit()
 
 
 def create_project(
