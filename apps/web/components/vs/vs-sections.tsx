@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import type { VsHighlight, VsKeyTakeaway } from '@/lib/vs-source';
 
 /** Consistent section shell: optional eyebrow + centered heading + intro. */
@@ -109,22 +109,46 @@ export function HighlightCards({ items }: { items: VsHighlight[] }) {
   );
 }
 
+// Pages carry up to two rival strengths; older ones still have three. Size the
+// grid to the count so two cards sit centered instead of leaving a gap column.
+const RIVAL_STRENGTH_GRID: Record<number, string> = {
+  1: 'mx-auto max-w-2xl',
+  2: 'mx-auto max-w-4xl md:grid-cols-2',
+};
+
 export function RivalStrengths({
   items,
 }: {
   items: { title: string; body: string }[];
 }) {
+  const grid = RIVAL_STRENGTH_GRID[items.length] ?? 'md:grid-cols-3';
+  const roomy = items.length <= 2;
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className={`grid gap-4 ${grid}`}>
       {items.map((item, i) => (
         <div
           key={i}
-          className="rounded-2xl border border-border bg-card p-6"
+          className={`flex h-full flex-col rounded-2xl border border-border bg-card ${
+            roomy ? 'p-7' : 'p-6'
+          }`}
         >
-          <h3 className="mb-2 text-base font-medium text-foreground">
-            {item.title}
-          </h3>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <div className="mb-3 flex items-center gap-2.5">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground/60">
+              <Check className="h-3.5 w-3.5" />
+            </span>
+            <h3
+              className={`font-medium text-foreground ${
+                roomy ? 'text-lg' : 'text-base'
+              }`}
+            >
+              {item.title}
+            </h3>
+          </div>
+          <p
+            className={`leading-relaxed text-muted-foreground ${
+              roomy ? 'text-[0.95rem]' : 'text-sm'
+            }`}
+          >
             {item.body}
           </p>
         </div>
