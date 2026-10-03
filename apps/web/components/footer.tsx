@@ -87,6 +87,7 @@ export function Footer() {
               <li><a href="/vs/superset" className="hover:text-blue-400 transition-colors">Vicoa vs Superset.sh</a></li>
               <li><a href="/vs/paseo" className="hover:text-blue-400 transition-colors">Vicoa vs Paseo</a></li>
               <li><a href="/vs/moshi" className="hover:text-blue-400 transition-colors">Vicoa vs Moshi</a></li>
+              <li><a href="/vs/codex-relay" className="hover:text-blue-400 transition-colors">Vicoa vs Codex Relay</a></li>
             </ul>
           </div>
 
