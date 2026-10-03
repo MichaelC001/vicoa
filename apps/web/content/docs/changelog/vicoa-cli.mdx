@@ -5,6 +5,15 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.8
+3 October, 2026
+- People you share a session or a project with now follow it live in the normal session page; an editor can prompt it from the same composer, and a viewer reads along
+- A project, its labels and its agents can belong to a team: move a project into a team from its settings, and everyone on the team can run the team's agents and assign them to the team's tasks
+- Teams get a free Viewer role that reads and comments on the team's projects and sessions without taking a seat
+- Videos open and play from the Files tab on the web, desktop and mobile instead of showing no preview; the machine holding the file needs this version of the daemon
+- Remove webhook agents (Custom Webhook, Vicoa Serve, GitHub Actions) and the webhook that forwarded a reply to an agent-supplied URL; the machine daemon starts and controls sessions instead
+- The `live-preview` agent skill now ships beside `vicoa-cli` in `skills/`, so it installs with `npx skills add vicoa-ai/vicoa --skill live-preview`
+
 ### v1.9.7
 29 September, 2026
 - Share a project or a single session with specific people by email, or with a whole team, not only by link; someone without an account gets the access when they sign up with that address
