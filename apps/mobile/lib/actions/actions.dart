@@ -72,7 +72,7 @@ Future postAuth(
 Future checkVersion(BuildContext context) async {
   String? latestVersion;
 
-  FFAppState().appVersion = '1.7.12';
+  FFAppState().appVersion = '1.7.13';
   if (FFAppState().appVersion == FFAppState().setting.versionNotified) {
     return;
   }
