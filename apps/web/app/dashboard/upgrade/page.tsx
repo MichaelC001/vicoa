@@ -25,6 +25,8 @@ export default function DashboardUpgradePage() {
       </div>
 
       <PostHogPageEvent event="upgrade_page_viewed" />
+      {/* Plans only. Seats have their own page (/dashboard/seats), which
+          every seat entry point links to directly. */}
       <div className="mt-10">
         <PricingCards />
       </div>
