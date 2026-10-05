@@ -56,6 +56,7 @@ from .task_models import (
 from .agent_profile_models import AgentProfile
 from .automation_models import (
     Automation,
+    AutomationPosition,
     AutomationRun,
     AUTOMATION_RUN_STATUSES,
     AUTOMATION_SCHEDULE_KINDS,
@@ -122,6 +123,7 @@ __all__ = [
     "set_session_actor",
     "AgentProfile",
     "Automation",
+    "AutomationPosition",
     "AutomationRun",
     "AUTOMATION_RUN_STATUSES",
     "AUTOMATION_SCHEDULE_KINDS",
