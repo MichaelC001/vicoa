@@ -54,6 +54,16 @@ Flags:
 - `--allow-signup`: leave sign-up open (for reviewing the sign-up flow). By
   default it closes after seeding, because anyone with the link can reach the server.
 - `--provider ngrok`: by default cloudflared is tried first, then ngrok.
+- `--auth supabase`: only when the user asks to review the **mobile app**, which
+  can only sign in with Supabase. Everything else uses the default (builtin),
+  and every `up` without the flag is builtin again. It signs in with a hosted
+  Supabase project instead of seeded accounts. Export
+  `SUPABASE_URL` and `SUPABASE_ANON_KEY` first (`apps/mobile/env.json` has
+  them). Identity only: the data stays in the preview's database. There are no
+  Ada/Bea accounts, so seeds write rows for the person who signs in (find them
+  in `users` by email after their first sign-in). Point the app at the preview
+  in the debug branch of `apps/mobile/lib/custom_code/actions/vicoa_api_config.dart`
+  (`https://<public_url>` and `wss://<public_url>/ws`), and never commit that file.
 
 ## 2. Seed what the change needs
 
