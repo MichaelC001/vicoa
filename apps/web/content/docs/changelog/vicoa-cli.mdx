@@ -5,6 +5,19 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.9
+6 October, 2026
+- `vicoa automation create|update --agent-profile NAME` links an automation to a saved agent, and `--agent-profile none` unlinks it; a linked automation runs the agent's own config, so session flags passed next to it are refused instead of silently ignored
+- Fix an automation linked to a saved agent starting what looked like a plain session: the session now names the agent, shows in its run history, and the agent signs its task comments. Run now in the app also uses the agent's instructions
+- `vicoa task create|update --description -` reads the description from stdin, like `task comment -`, instead of saving a literal "-"
+- Share a project's automations along with its tasks and sessions; the people you share with see them read-only
+- Automations keep the order you drag them into in the app, and `vicoa automation ls` and the mobile app list them the same way; each person's order is their own
+- Fix a project someone shared with you pulling in your own sessions from the same repository, where its owner could read and prompt them; it now takes them only once you add it to your sidebar
+- Fix restarting the desktop app ending a running session whose prompt mentioned the daemon, which then showed as finished; `vicoa stop daemon` no longer mistakes such a session for the daemon either
+- Fix worktree setup commands picking up the system `python3` and missing your shell's tools on macOS; they now run in the daemon's own environment
+- A share link's page lists its sessions by latest activity and can filter them by status
+- Harden the daemon: it refuses a git ref starting with `-`, and its local server rejects connections opened from a website other than its own local page
+
 ### v1.9.8
 3 October, 2026
 - People you share a session or a project with now follow it live in the normal session page; an editor can prompt it from the same composer, and a viewer reads along
