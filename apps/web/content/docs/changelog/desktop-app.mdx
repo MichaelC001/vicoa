@@ -5,6 +5,19 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.36
+6 October, 2026
+- Bundle Vicoa CLI daemon [v1.9.9](/docs/changelog/vicoa-cli#v199)
+- Drag automations into the order you want, or move them with space and the arrow keys; the order is saved, it is yours alone, and under All automations a row moves within its project's group
+- Pick an automation's project with the same picker as a new session, and keep using it while the target machine is offline
+- Pick a saved agent straight from an automation's Agent dropdown, as on the new session page; the model, effort and permission chips step aside since each run uses the agent's own config, and Run now uses its instructions
+- Type `#` in the new session prompt to reference a session, task or automation, as you already can in the chat
+- A project's settings have a Sharing tab beside General, with the same People and Link panels as the Share dialog
+- A project shared with you has Tasks and Automations side by side in its sidebar menu; your own project's menu now sticks to settings, sharing and archiving
+- A project shared with you only takes your sessions once you add it to your sidebar, and the folder picker leaves out shared projects you have not added
+- Fix worktree setup failing with `pnpm: command not found` after the app was opened from Finder, the Dock or an update on a busy machine; the daemon now gets your full shell environment, and Restart daemon recovers without quitting the app
+- Fix restarting the app ending a running session whose prompt mentioned the daemon, which then showed as finished
+
 ### v0.1.35
 5 October, 2026
 - Bundle Vicoa CLI daemon [v1.9.8](/docs/changelog/vicoa-cli#v198)
