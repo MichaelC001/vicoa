@@ -5,6 +5,17 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.37
+8 October, 2026
+- Bundle Vicoa CLI daemon [v1.9.10](/docs/changelog/vicoa-cli#v1910)
+- Move a session to another project from its sidebar menu (right-click or the hover menu) or the session header menu: a Project submenu lists the projects you can add sessions to, plus No project, with the current one checked
+- Projects without a chosen image or emoji show a folder icon instead of a colored initial, drawn open while the project's sidebar group is expanded; No project shows a dashed square
+- Project icons no longer flash to the default when you come back from Settings, an uploaded icon loads from disk on the next launch, and an icon change shows everywhere at once
+- The session header's ⋯ menu sits next to Share, hovering the folder chip names the session's project, and the header's tooltips now show in the desktop app
+- Type a task's identifier after `#`, like `#VIC-42`, to reference that task; a partial one such as `vic-4` narrows the list to that project's tasks
+- Fix a task comment holding a long unbroken path or id stretching its card past the timeline
+- Fix replacing a project's uploaded icon with another sometimes leaving the old image showing
+
 ### v0.1.36
 6 October, 2026
 - Bundle Vicoa CLI daemon [v1.9.9](/docs/changelog/vicoa-cli#v199)
