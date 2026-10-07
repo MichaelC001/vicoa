@@ -22,7 +22,7 @@ import { trackFirstMessageSent } from '@/lib/desktop-telemetry';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAgentDashboard } from '@/lib/contexts/agent-dashboard-context';
 import { useDashboardNavigation } from '@/lib/contexts/dashboard-navigation-context';
-import { AgentInstanceDetail, MessageResponse, SessionInstanceMetadata, type ProjectResponse } from '@/lib/backend-api';
+import { AgentInstanceDetail, MessageResponse, SessionInstanceMetadata } from '@/lib/backend-api';
 import { getInstanceDetail, postInstanceMessage } from '@/lib/agent-instance-api';
 import { getMessageStore } from '@/lib/message-store';
 import { useMessageStream } from '@/lib/hooks/use-ws-stream';
@@ -62,7 +62,7 @@ import { SessionEmptyState } from '@/components/dashboard/session-empty-state';
 import { SessionActionsMenu } from '@/components/dashboard/session-actions-menu';
 import { fileableProjects, sessionProjectChoices } from '@/components/dashboard/session-project-choices';
 import { NO_PROJECT_LABEL } from '@/components/dashboard/task-ui';
-import { PROJECTS_CHANGED_EVENT } from '@/lib/project-settings-route';
+import { useProjects } from '@/lib/use-projects';
 import { FileSearchPalette } from '@/components/dashboard/file-search-palette';
 import { toAbsolutePath } from '@/lib/utils';
 import { RenameSessionDialog, DeleteSessionDialog, CompleteSessionDialog } from '@/components/dashboard/session-dialogs';
@@ -653,32 +653,18 @@ function AgentInstanceContent() {
 
   // The caller's projects: the header names the one this session is filed
   // under, and the ⋯ menu's "Project ▸" offers the same choices as the sidebar
-  // row's menu. Refetched when the session moves (it may land in a project
-  // created after this page loaded) and when a project is edited elsewhere.
-  // Nothing on the logged-out desktop, whose local daemon has no projects.
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  // row's menu. The shared list; refetched when the session lands in a
+  // project it doesn't have yet (one created after it loaded). Empty on the
+  // logged-out desktop, whose local daemon has no projects; on a failed load
+  // the header falls back to the folder and the menu drops Project.
+  const { projects: loadedProjects, mutate: mutateProjects } = useProjects();
+  const projects = useMemo(() => loadedProjects ?? [], [loadedProjects]);
   const instanceProjectId = instance?.project_id ?? null;
+  const knowsInstanceProject =
+    !instanceProjectId || !loadedProjects || loadedProjects.some((p) => p.id === instanceProjectId);
   useEffect(() => {
-    const api = dashboardContext.api;
-    if (!api || isDesktopLocal()) return;
-    let cancelled = false;
-    const load = () => {
-      api
-        .listProjects(true)
-        .then((list) => {
-          if (!cancelled) setProjects(list);
-        })
-        .catch(() => {
-          /* best-effort: the header falls back to the folder, the menu drops Project */
-        });
-    };
-    load();
-    window.addEventListener(PROJECTS_CHANGED_EVENT, load);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(PROJECTS_CHANGED_EVENT, load);
-    };
-  }, [dashboardContext.api, instanceId, instanceProjectId]);
+    if (!knowsInstanceProject) void mutateProjects();
+  }, [knowsInstanceProject, mutateProjects]);
   // Moving needs manage rights on the session, so only the owner gets choices.
   const fileable = useMemo(() => (isOwner ? fileableProjects(projects) : []), [isOwner, projects]);
   const headerProject = instanceProjectId
@@ -2540,92 +2526,6 @@ function AgentInstanceContent() {
                 )}
               </>
             )}
-            {/* Session actions belong with the session's identity, not with the
-                view controls on the right edge. NO_DRAG because the left half of
-                this header is the desktop title bar's drag region. */}
-            <div style={NO_DRAG} className="flex-shrink-0">
-              {/* The three-dot menu also hosts "Open in ▸": the project
-                  directory is a session-level target, so it belongs with the
-                  session's other actions rather than in its own control. The
-                  files panel keeps a top-level "Open in" because there the
-                  target is the file on screen. */}
-              {!isOwner ? (
-                <SessionActionsMenu
-                  onCopyId={() => {
-                    void handleCopySessionId();
-                  }}
-                  copied={copiedSessionId === (instance?.id || instanceId)}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                  iconClassName="h-4 w-4"
-                  contentClassName="font-mono"
-                />
-              ) : (
-                <SessionActionsMenu
-                  trailingItems={
-                    <OpenInSubMenu
-                      machineId={instance.machine_id ?? null}
-                      cwd={instance.project ?? null}
-                      separatorBefore
-                    />
-                  }
-                  projectChoices={sessionProjectChoices(
-                    fileable,
-                    instance.project_id ?? null,
-                    (projectId) => void handleMoveToProject(projectId),
-                  )}
-                  onResume={() => void handleResumeSession()}
-                  showResume={canResume}
-                  resumeDisabledReason={
-                    isResuming
-                      ? 'Resuming…'
-                      : resumeBlocked
-                        ? resumeBlockedMessage(resumeBlocked)
-                        : null
-                  }
-                  resumeBlockedLabel={
-                    isResuming
-                      ? 'Resuming…'
-                      : resumeBlocked
-                        ? resumeBlockedShortLabel(resumeBlocked)
-                        : null
-                  }
-                  onPin={handleTogglePin}
-                  isPinned={!!instance.pinned_at}
-                  onShare={
-                    !isDesktopLocal() && instance.is_owner !== false ? () => setShareOpen(true) : undefined
-                  }
-                  onRename={handleOpenRenameDialog}
-                  onCopyId={() => {
-                    void handleCopySessionId();
-                  }}
-                  copied={copiedSessionId === (instance?.id || instanceId)}
-                  onMarkDone={
-                    instance.status !== 'COMPLETED'
-                      ? () => {
-                          const sessionName = instance.name || '';
-                          handleMarkSessionComplete(instanceId, sessionName);
-                        }
-                      : undefined
-                  }
-                  showMarkDone={instance.status !== 'COMPLETED'}
-                  onUnread={
-                    instance.status === 'REVIEWED'
-                      ? () => {
-                          void handleMarkSessionUnread(instanceId);
-                        }
-                      : undefined
-                  }
-                  showUnread={instance.status === 'REVIEWED'}
-                  onDelete={() => {
-                    const sessionName = instance.name || '';
-                    handleDeleteSession(instanceId, sessionName);
-                  }}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                  iconClassName="h-4 w-4"
-                  contentClassName="font-mono"
-                />
-              )}
-            </div>
           </div>
         </TooltipProvider>
         <div style={NO_DRAG} className="flex items-center gap-0.5">
@@ -2636,6 +2536,88 @@ function AgentInstanceContent() {
               NO_DRAG for its click). */}
           {isOwner && (
             <WorktreeSetupBadge machineId={instance.machine_id ?? null} cwd={instance.project ?? null} />
+          )}
+          {/* The ⋯ menu sits with the other action buttons, left of Share.
+              It also hosts "Open in ▸": the project directory is a
+              session-level target, so it belongs with the session's other
+              actions rather than in its own control. The files panel keeps a
+              top-level "Open in" because there the target is the file on
+              screen. */}
+          {!isOwner ? (
+            <SessionActionsMenu
+              onCopyId={() => {
+                void handleCopySessionId();
+              }}
+              copied={copiedSessionId === (instance?.id || instanceId)}
+              className="h-8 w-8 p-0 hover:bg-muted"
+              iconClassName="h-4 w-4"
+              contentClassName="font-mono"
+            />
+          ) : (
+            <SessionActionsMenu
+              trailingItems={
+                <OpenInSubMenu
+                  machineId={instance.machine_id ?? null}
+                  cwd={instance.project ?? null}
+                  separatorBefore
+                />
+              }
+              projectChoices={sessionProjectChoices(
+                fileable,
+                instance.project_id ?? null,
+                (projectId) => void handleMoveToProject(projectId),
+              )}
+              onResume={() => void handleResumeSession()}
+              showResume={canResume}
+              resumeDisabledReason={
+                isResuming
+                  ? 'Resuming…'
+                  : resumeBlocked
+                    ? resumeBlockedMessage(resumeBlocked)
+                    : null
+              }
+              resumeBlockedLabel={
+                isResuming
+                  ? 'Resuming…'
+                  : resumeBlocked
+                    ? resumeBlockedShortLabel(resumeBlocked)
+                    : null
+              }
+              onPin={handleTogglePin}
+              isPinned={!!instance.pinned_at}
+              onShare={
+                !isDesktopLocal() && instance.is_owner !== false ? () => setShareOpen(true) : undefined
+              }
+              onRename={handleOpenRenameDialog}
+              onCopyId={() => {
+                void handleCopySessionId();
+              }}
+              copied={copiedSessionId === (instance?.id || instanceId)}
+              onMarkDone={
+                instance.status !== 'COMPLETED'
+                  ? () => {
+                      const sessionName = instance.name || '';
+                      handleMarkSessionComplete(instanceId, sessionName);
+                    }
+                  : undefined
+              }
+              showMarkDone={instance.status !== 'COMPLETED'}
+              onUnread={
+                instance.status === 'REVIEWED'
+                  ? () => {
+                      void handleMarkSessionUnread(instanceId);
+                    }
+                  : undefined
+              }
+              showUnread={instance.status === 'REVIEWED'}
+              onDelete={() => {
+                const sessionName = instance.name || '';
+                handleDeleteSession(instanceId, sessionName);
+              }}
+              className="h-8 w-8 p-0 hover:bg-muted"
+              iconClassName="h-4 w-4"
+              contentClassName="font-mono"
+            />
           )}
           {/* Share sits next to the panel toggle (same visual weight); the
               ⋯ menu keeps its entry too. Same gate as the menu entry. */}
