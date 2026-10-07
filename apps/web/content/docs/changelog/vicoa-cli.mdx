@@ -5,6 +5,13 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.10
+8 October, 2026
+- `vicoa session update --project <key|name|none>` moves a session to another of your projects, or to No project; moving it into an archived project brings that project back, and an older server that ignores the move is reported instead of passing silently
+- A session moved to another project regroups in every open app at once, without a reload
+- Find a task by its identifier after `#`, such as `#VIC-42`, in the session composer and the new session prompt; a full identifier puts that task first even when it is done, and a partial one like `vic-4` narrows the list to that project's tasks
+- Fix replacing a project's uploaded icon with another sometimes leaving the old image showing
+
 ### v1.9.9
 6 October, 2026
 - `vicoa automation create|update --agent-profile NAME` links an automation to a saved agent, and `--agent-profile none` unlinks it; a linked automation runs the agent's own config, so session flags passed next to it are refused instead of silently ignored
