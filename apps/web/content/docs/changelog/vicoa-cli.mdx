@@ -5,6 +5,13 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.11
+8 October, 2026
+- `vicoa automation create|update --session <id>` runs an automation in one of your existing sessions instead of starting a new one each time, and `--session none` goes back to a new session per run; the session brings its own machine, folder and agent, so flags that set those are refused next to it
+- An automation that runs in a session sends each prompt as a message, or resumes the session with it when it has stopped; a run is skipped while the previous prompt is still waiting, and the automation pauses once its session is gone
+- A task status set in the app or with `vicoa task update` now stays put when its linked session starts, ends or is reviewed, so an agent that marks its task blocked and exits leaves it blocked
+- `vicoa task create`, `update` and `comment` run inside a Vicoa session record that session, so the task page shows which session created the task and which one each comment or change came from
+
 ### v1.9.10
 8 October, 2026
 - `vicoa session update --project <key|name|none>` moves a session to another of your projects, or to No project; moving it into an archived project brings that project back, and an older server that ignores the move is reported instead of passing silently
