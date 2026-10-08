@@ -5,6 +5,18 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.38
+8 October, 2026
+- Bundle Vicoa CLI daemon [v1.9.11](/docs/changelog/vicoa-cli#v1911)
+- Run an automation in one of your sessions: its new Runs in row searches your sessions, or keeps New session each run. Each run sends the prompt into that session, resuming it if it has stopped, and Run now continues it
+- A session's header names the automation that runs in it and lists the tasks the session created
+- A task shows which session it was created in, and comments and changes made from a session say "via" that session; only sessions you can open are named
+- A task status chosen in the app or with `vicoa task update` now stays when its linked session starts, ends or is reviewed
+- The account menu shows your name, email and plan: Free with Upgrade, or Pro or Vicoa Team with Manage, which opens Billing in your browser
+- Upgrade opens the pricing page's plan cards in a dialog over the app, so your session list no longer reloads; Teams > Get Pro opens it too
+- Pro users go straight into the app after the setup scan instead of seeing the paywall, and a slow or failed plan check lets you in rather than holding you there
+- The setup paywall no longer offers a free trial, since Pro has none
+
 ### v0.1.37
 8 October, 2026
 - Bundle Vicoa CLI daemon [v1.9.10](/docs/changelog/vicoa-cli#v1910)
