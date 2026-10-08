@@ -12,7 +12,7 @@
  * when its window regains focus.
  */
 
-import { getBackendAPI, type BillingInterval } from '@/lib/backend-api';
+import { getBackendAPI, type BillingInterval, type BillingSubscription } from '@/lib/backend-api';
 import { getDesktopAuthBridge } from '@/lib/desktop-auth';
 
 /** Monthly list price, USD. Mirrors app/(marketing)/pricing/pricing-cards.tsx. */
@@ -21,12 +21,6 @@ export const PRO_MONTHLY_PRICE = 12;
 export const PRO_ANNUAL_PRICE = 108;
 /** What the annual plan works out to per month. */
 export const PRO_ANNUAL_MONTHLY_EQUIVALENT = 9;
-/**
- * Free-trial length on the annual plan, in days. Mirrors the `trialDays`
- * default in app/(marketing)/pricing/pricing-cards.tsx — the annual Stripe
- * price is the one that carries a trial, so this copy only shows for annual.
- */
-export const PRO_TRIAL_DAYS = 7;
 
 export function annualSavingPercent(): number {
   return Math.round((1 - PRO_ANNUAL_PRICE / (PRO_MONTHLY_PRICE * 12)) * 100);
@@ -46,6 +40,35 @@ export function isPro(plan: { plan_type: string } | null | undefined): boolean {
 export function shouldShowPaywall(plan: { plan_type: string } | null | undefined): boolean {
   if (plan === null || plan === undefined) return false;
   return !isPro(plan);
+}
+
+/**
+ * How long onboarding waits on a plan read before letting the user through.
+ * No API request has a timeout of its own, and a slow backend must never keep
+ * anyone out of the app.
+ */
+export const PLAN_READ_WAIT_MS = 2000;
+
+/** `promise`'s value, or null if it rejects or takes longer than `ms`. */
+export async function settleWithin<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), ms);
+      }),
+    ]);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Re-read the plan, giving up (null, i.e. unknown) after `ms`. */
+export function readPlanWithin(ms: number): Promise<BillingSubscription | null> {
+  return settleWithin(getBackendAPI(true).getBillingSubscription(), ms);
 }
 
 /**

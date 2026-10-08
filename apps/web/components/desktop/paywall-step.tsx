@@ -8,10 +8,11 @@ import {
   PRO_ANNUAL_MONTHLY_EQUIVALENT,
   PRO_ANNUAL_PRICE,
   PRO_MONTHLY_PRICE,
-  PRO_TRIAL_DAYS,
+  PLAN_READ_WAIT_MS,
   annualSavingPercent,
   checkoutErrorMessage,
   isPro,
+  readPlanWithin,
   startDesktopCheckout,
 } from '@/lib/desktop-paywall';
 import {
@@ -66,7 +67,7 @@ function PlanCard({
   // Both tiles headline a per-month price so $9 vs $12 compares at a glance;
   // the annual tile carries the yearly total in the fine print beneath it.
   const perMonth = isAnnual ? PRO_ANNUAL_MONTHLY_EQUIVALENT : PRO_MONTHLY_PRICE;
-  const subtext = isAnnual ? `Try ${PRO_TRIAL_DAYS} days for free` : 'Billed monthly';
+  const subtext = isAnnual ? `$${PRO_ANNUAL_PRICE} billed yearly` : 'Billed monthly';
   return (
     <button
       type="button"
@@ -176,15 +177,10 @@ export function PaywallStep({ onDone }: { onDone: (skipped: boolean) => void }) 
   const declineLater = useCallback(async () => {
     if (declining) return;
     setDeclining(true);
-    let plan: BillingSubscription | null = null;
-    try {
-      plan = await getBackendAPI(true).getBillingSubscription();
-    } catch {
-      // Couldn't read entitlement — fall through to the reassurance view rather
-      // than trapping the user on the paywall.
-    } finally {
-      setDeclining(false);
-    }
+    // Bounded: a read that fails or hangs falls through to the reassurance
+    // view rather than trapping the user on the paywall.
+    const plan = await readPlanWithin(PLAN_READ_WAIT_MS);
+    setDeclining(false);
     if (isPro(plan)) {
       finish(false);
       return;
@@ -214,11 +210,11 @@ export function PaywallStep({ onDone }: { onDone: (skipped: boolean) => void }) 
   }
 
   const isAnnual = interval === 'annual';
-  const ctaLabel = checkingOut ? 'Opening checkout…' : isAnnual ? 'Start free trial' : 'Continue';
-  // Only the annual price carries a trial (mirrors the marketing pricing page),
-  // so the reassuring fine print changes with the selected interval.
+  const ctaLabel = checkingOut ? 'Opening checkout…' : 'Continue';
+  // No trial on either interval: checkout charges right away, so the fine
+  // print states what is due for the selected interval.
   const finePrint = isAnnual
-    ? `${PRO_TRIAL_DAYS}-day free trial, then $${PRO_ANNUAL_PRICE}/yr. Cancel anytime.`
+    ? `$${PRO_ANNUAL_PRICE}/yr, billed yearly. Cancel anytime.`
     : `$${PRO_MONTHLY_PRICE}/mo, billed monthly. Cancel anytime.`;
 
   return (
