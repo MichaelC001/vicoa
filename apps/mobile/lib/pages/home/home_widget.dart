@@ -29,6 +29,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'home_model.dart';
+import 'home_group_header.dart';
 export 'home_model.dart';
 import '/auth/supabase_auth/auth_util.dart';
 
@@ -343,42 +344,19 @@ class _HomeWidgetState extends State<HomeWidget>
     final groupBy = _model.selectedGroupBy;
     final useLargeHeader = groupBy == 'Project' || groupBy == 'Status';
 
-    for (final entry in groupedSessions.entries) {
-      final isCollapsed = _collapsedGroups[entry.key] ?? false;
+    for (final group in groupedSessions) {
+      final isCollapsed = _collapsedGroups[group.key] ?? false;
 
       widgets.add(
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        HomeGroupHeader(
+          group: group,
+          collapsed: isCollapsed,
+          large: useLargeHeader,
           onTap: () {
             setState(() {
-              _collapsedGroups[entry.key] = !isCollapsed;
+              _collapsedGroups[group.key] = !isCollapsed;
             });
           },
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(6.0, 6.0, 0.0, 8.0),
-            child: Row(
-              children: [
-                Text(
-                  localizedFilterLabel(entry.key),
-                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                        fontSize: useLargeHeader ? 17.0 : 16.0,
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                      ),
-                ),
-                const SizedBox(width: 4.0),
-                AnimatedRotation(
-                  turns: isCollapsed ? -0.25 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  child: Icon(
-                    Icons.expand_more_rounded,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    size: useLargeHeader ? 20.0 : 18.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       );
 
@@ -391,7 +369,7 @@ class _HomeWidgetState extends State<HomeWidget>
             heightFactor: isCollapsed ? 0.0 : 1.0,
             child: Column(
               children: [
-                for (final session in entry.value)
+                for (final session in group.sessions)
                   _buildSessionCard(session, session['status'] ?? 'UNKNOWN',
                       groupBy: groupBy),
               ],

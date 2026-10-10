@@ -7,9 +7,10 @@ import 'task_chips.dart';
 import 'task_glyphs.dart';
 
 /// One row in the tasks list: the title on top, then a second row carrying the
-/// priority glyph, an optional status glyph, the project chip and label chips.
-/// Which of priority/status/project appear is controlled by the Display toggles
-/// in the header filter. Tapping opens the task detail sheet.
+/// "VIC-42" identifier, the priority glyph, an optional status glyph, the
+/// project chip and label chips. Which of priority/status/project/labels appear
+/// is controlled by the Display toggles in the header filter; the identifier
+/// always shows. Tapping opens the task detail sheet.
 class TaskCard extends StatelessWidget {
   const TaskCard({
     super.key,
@@ -40,8 +41,10 @@ class TaskCard extends StatelessWidget {
     final status = tutils.taskStatus(task);
     final showProjectChip =
         showProject && project != null;
+    final hasIdentifier = tutils.taskIdentifier(task) != null;
 
     final metaRow = <Widget>[
+      if (hasIdentifier) TaskIdentifier(task: task),
       if (showPriority) TaskPriorityIcon(priority: tutils.taskPriority(task)),
       if (showStatus) TaskStatusIcon(status: status),
       if (showProjectChip)
