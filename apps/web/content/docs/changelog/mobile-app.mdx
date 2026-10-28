@@ -5,6 +5,16 @@ description: Release notes for the Vicoa iOS and Android apps — new features, 
 
 # Mobile App
 
+### v1.7.15
+11 October, 2026
+- Pick the session an automation runs in: the editor's new Runs in row opens a picker with "New session each run" (the default), your recent sessions and a search across all of them, and a picked session brings its own machine, folder and agent
+- Task ids like `VIC-42` show on task cards, in the task sheet, on sub-tasks and in search, and search finds a task by its id once you type the dash (`vic-4`)
+- Filter automations by project, from a new Project section in the Automations filter
+- Home's project groups work like the web sidebar: each group leads with the project's icon, two projects with the same name stay separate, sessions of an archived project leave Home (pinned ones stay), and a project named "Done" or "Today" keeps its name
+- A session whose delete fails comes back where it was, instead of staying hidden until the app restarts
+- Error messages stay up for 3 seconds so you can read them, and the "Welcome to Vicoa" and "Get started" titles are readable in light mode
+- The search field no longer autocorrects what you type, so an id like `lig-1` stays as typed
+
 ### v1.7.14
 7 October, 2026
 - Type `#` in the chat composer or the new session prompt, or pick "Reference a session or task" from the "+" menu, to point the agent at one of your sessions, tasks or automations; it goes out with your message as context, and referencing a task also files the session under that task
