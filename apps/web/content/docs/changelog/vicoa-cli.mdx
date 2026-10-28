@@ -5,6 +5,13 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.12
+28 October, 2026
+- `vicoa task ls --label a,b` keeps tasks that carry any of those labels; repeated `--label` flags still all have to match, so `--label growth --label bug,docs` is growth plus either bug or docs
+- Fix starting a session with a long prompt failing with a server error
+- Fix `vicoa session start --agent-profile` starting a session without the saved agent's instructions; the session now runs that agent and records it
+- Search finds a task by its identifier, such as `VIC-42`, and shows the identifier next to each task it returns
+
 ### v1.9.11
 8 October, 2026
 - `vicoa automation create|update --session <id>` runs an automation in one of your existing sessions instead of starting a new one each time, and `--session none` goes back to a new session per run; the session brings its own machine, folder and agent, so flags that set those are refused next to it
