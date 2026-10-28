@@ -1,7 +1,7 @@
 ---
 name: stack-preview
 description: Run the whole Vicoa stack (Postgres, backend, realtime server, web dashboard) from the current checkout and publish it at one public tunnel URL, so a branch can be reviewed from another machine or in the Vicoa app. Use when asked for a full-stack or end-to-end preview link of a Vicoa branch or PR, or when /live-preview is not enough because the dashboard needs a backend.
-argument-hint: "[up | status | restart | down [--purge]] [--env-file FILE] [--allow-signup]"
+argument-hint: "[up | status | restart | down [--keep-db | --delete-db | --purge] | prune] [--env-file FILE] [--allow-signup]"
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -101,21 +101,40 @@ before login.
 
 ## 4. Hand over
 
-Give the user the public URL, both logins, what you seeded and where to click,
+Give the user the sign-in link (the `sign_in:` line, i.e. the public URL plus
+`/sign-in`, such as `https://<name>.trycloudflare.com/sign-in`), so it opens
+straight on the login form. Add both logins, what you seeded and where to click,
 and the stop command. Leave the preview running until they say they're done.
 
 While it runs: web edits hot-reload by themselves. After backend changes, run
 `stack-preview.sh restart` (default: server and backend; or
 `restart backend|server|web`). `restart` keeps the tunnel, so the link stays
-valid. `down` then `up` keeps the data but gives a **new** URL.
+valid. `down` then `up` gives a **new** URL; the data survives it only in the
+main checkout or with `down --keep-db`.
 
 ## Stop
 
 `stack-preview.sh down` stops every process the script started (checked by
-recorded PID and start time) and the database container; the data survives.
-`down --purge` also deletes the container and the state dir. Side processes
-started with `stack-preview.sh run NAME -- CMD...` (e.g. a `stripe listen`
-forwarding to `127.0.0.1:$PREVIEW_BACKEND_PORT`) stop with it.
+recorded PID and start time). Side processes started with
+`stack-preview.sh run NAME -- CMD...` (e.g. a `stripe listen` forwarding to
+`127.0.0.1:$PREVIEW_BACKEND_PORT`) stop with it. What happens to the database
+depends on the checkout:
+
+- **A worktree** (the usual case): `down` deletes the database container with
+  its volume, and the `postgres:16-alpine` image, so nothing is left in Docker.
+  The image goes only when no other container uses it, running or stopped (the
+  backend's compose file and integration tests use the same image); the next
+  `up` pulls it again.
+- **The main checkout**: `down` stops the container and keeps it, so the next
+  `up` has the same data.
+- `down --keep-db` / `down --delete-db` override that default either way.
+- `down --purge`: delete the database and the state dir, which holds the
+  account passwords, so the next `up` makes new ones.
+- `down` still finds the container when the state dir is gone (a reboot
+  empties `/tmp`).
+- `prune` deletes stopped preview databases whose checkout no longer exists,
+  e.g. a worktree that was removed without `down`. It never touches a running
+  container or one whose checkout still exists.
 
 ## Rules
 
