@@ -5,6 +5,12 @@ description: Release notes for the Vicoa CLI and daemon — new agent support, b
 
 # Vicoa CLI
 
+### v1.9.13
+29 October, 2026
+- Add Claude Sonnet 5.5 to the model picker and drop duplicate 1M-context model entries
+- Fix slash command and skill sync failing when a file such as `SKILL.md` isn't valid UTF-8 text, which corrupted the whole sync and dropped every command for that agent
+- Send AskUserQuestion option previews (drafts, mockups, snippets) through to the dashboard and app, instead of dropping them when Claude draws them in its own side-by-side box
+
 ### v1.9.12
 28 October, 2026
 - `vicoa task ls --label a,b` keeps tasks that carry any of those labels; repeated `--label` flags still all have to match, so `--label growth --label bug,docs` is growth plus either bug or docs
