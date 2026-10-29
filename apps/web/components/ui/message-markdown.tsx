@@ -8,6 +8,8 @@ import { makeFindHighlightPlugin } from '@/lib/find-highlight';
 import { messageUrlTransform, parseMessageLink } from '@/lib/message-links';
 import { isTextSelectionClick } from '@/lib/text-selection';
 import { useFileLinks } from '@/components/dashboard/file-link-context';
+import { ReferenceChipLink } from '@/components/dashboard/reference-chip';
+import { parseReferenceHref } from '@/lib/reference-links';
 
 type MessageAgentType = 'claude' | 'codex' | 'opencode';
 // unified's plugin-list types, reached through react-markdown so we don't take
@@ -424,6 +426,12 @@ const MARKDOWN_COMPONENTS: Components = {
           {children}
         </a>
       );
+    }
+    // A `#` reference to a task, session or automation: the same chip as in
+    // the description editor, with the item's current title.
+    const target = link.kind === 'app' ? parseReferenceHref(link.href) : null;
+    if (target) {
+      return <ReferenceChipLink kind={target.kind} id={target.id} label={flattenText(children)} />;
     }
     if (link.kind === 'file' && fileLinks.openFile) {
       const openFile = fileLinks.openFile;
