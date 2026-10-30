@@ -20,6 +20,14 @@ describe('cliRowDescription', () => {
     expect(desc).not.toMatch(/task ls/);
   });
 
+  it('adds the version the installed command runs, when reported', () => {
+    expect(cliRowDescription({ ...base, installed: true, version: '1.9.13' })).toBe(
+      `Installed at ${base.path} (v1.9.13)`,
+    );
+    expect(cliRowDescription({ ...base, installed: true, version: null })).toBe(`Installed at ${base.path}`);
+    expect(cliRowDescription({ ...base, version: '1.9.13' })).not.toContain('1.9.13');
+  });
+
   it('warns about a foreign vicoa and names its path', () => {
     const desc = cliRowDescription({ ...base, foreign: true });
     expect(desc).toMatch(/Another "vicoa"/);

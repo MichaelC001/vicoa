@@ -17,6 +17,11 @@ export interface CliLinkStatus {
   available: boolean;
   /** Where the launcher lives (or would). */
   path: string;
+  /**
+   * The version the installed command runs. Null when it isn't installed (or
+   * reports none); absent from older desktop builds.
+   */
+  version?: string | null;
 }
 
 export interface CliInstallResult {
@@ -71,7 +76,7 @@ export function cliRowDescription(status: CliLinkStatus | null): string {
     return `Another "vicoa" is already on your PATH (${status.path}) — remove it to let Vicoa manage this`;
   }
   if (status?.installed) {
-    return `Installed at ${status.path}`;
+    return `Installed at ${status.path}${status.version ? ` (v${status.version})` : ''}`;
   }
   if (status && !status.available) {
     return 'Finishing agent setup — open a session once, then install';
