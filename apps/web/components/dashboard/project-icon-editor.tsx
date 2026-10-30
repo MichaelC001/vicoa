@@ -13,6 +13,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProjectIcon } from '@/components/dashboard/task-ui';
 import type { ProjectResponse } from '@/lib/backend-api';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 type IconProject = Pick<
@@ -51,11 +52,11 @@ export function ProjectIconEditor({
     event.target.value = ''; // allow re-picking the same file
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Please choose an image file.');
+      toast.error("Couldn't use that file", { description: 'Please choose an image file.' });
       return;
     }
     if (file.size > MAX_ICON_BYTES) {
-      alert('Image must be under 8MB.');
+      toast.error("Couldn't use that image", { description: 'Image must be under 8MB.' });
       return;
     }
     setOpen(false);

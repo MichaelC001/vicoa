@@ -44,6 +44,7 @@ import {
   TaskPriority,
   TaskResponse,
   TaskStatus,
+  refusalReason,
 } from '@/lib/backend-api';
 import {
   formatSidebarTime,
@@ -62,6 +63,7 @@ import {
   useAutoFocus,
 } from '@/components/dashboard/task-ui';
 import { isImeComposing } from '@/lib/ime';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 /** Persisted (desktop settings.json / localStorage) dialog size preference. */
@@ -283,8 +285,11 @@ export function TaskDialog({
       } else {
         onClose();
       }
-    } catch {
-      // Error surfaced by the caller; keep the dialog open for retry.
+    } catch (err) {
+      // The dialog stays open with what was typed, for a retry.
+      toast.error(task ? "Couldn't save the task" : "Couldn't create the task", {
+        description: refusalReason(err),
+      });
     } finally {
       setSaving(false);
     }
@@ -298,8 +303,9 @@ export function TaskDialog({
       setSaving(true);
       try {
         await onSubmit(values);
-      } catch {
+      } catch (err) {
         setSaving(false);
+        toast.error("Couldn't save the task", { description: refusalReason(err) });
         return; // keep the dialog open on the current task if the save failed
       }
       setSaving(false);
@@ -707,8 +713,9 @@ export function CreateProjectDialog({
     try {
       await onSubmit({ name: name.trim(), icon: icon.trim() || null });
       onClose();
-    } catch {
-      // Error surfaced by the caller; keep the dialog open for retry.
+    } catch (err) {
+      // The dialog stays open with what was typed, for a retry.
+      toast.error("Couldn't create the project", { description: refusalReason(err) });
     } finally {
       setSaving(false);
     }
