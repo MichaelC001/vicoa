@@ -5,6 +5,18 @@ description: Release notes for the Vicoa desktop app (macOS, Windows) — new fe
 
 # Desktop App
 
+### v0.1.41
+30 October, 2026
+- Bundle Vicoa CLI daemon [v1.9.13](/docs/changelog/vicoa-cli#v1913)
+- Sort automations by next run or by created date, ascending or descending; a finished one-time automation now shows as Completed instead of Paused
+- Filter automations by schedule: once, or recurring by cadence (minutely, hourly, daily, weekly, monthly, custom)
+- Edit a task's description as rendered text in place, instead of swapping to a raw markdown textarea
+- Edit or delete your own task comments from a new menu on the comment; typing with an IME no longer sends the comment on Enter
+- Browser alerts and confirms are gone; actions now show a themed toast or an in-app confirm dialog instead
+- Keep a project in the sidebar even when none of its sessions is open, and start a session right from its empty row or an empty worktree row
+- Refresh a branch's PR icon in the sidebar as soon as a session's turn ends, not just on window focus
+- Fix the app leaving an older, separately installed `vicoa` command on your PATH instead of switching it to the one it bundles
+
 ### v0.1.40
 29 October, 2026
 - Bundle Vicoa CLI daemon [v1.9.13](/docs/changelog/vicoa-cli#v1913)
