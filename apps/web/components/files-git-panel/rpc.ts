@@ -434,11 +434,14 @@ export async function rpcGitCommit(
  * created it under `~/vicoa/workspaces/` — only those are removable.
  * `display_path` is the home-collapsed `~/…` form a session registers as its
  * `project`; `prunable` is git's verdict that the folder is gone while the
- * registration lingers. Both are absent from an older daemon. */
+ * registration lingers; `upstream` is the remote branch `branch` pushes to
+ * (`""` when none), which a pull request names as its head. All three are
+ * absent from an older daemon. */
 export interface WorktreeInfo {
   path: string;
   display_path?: string;
   branch: string;
+  upstream?: string;
   head: string;
   managed: boolean;
   prunable?: boolean;
@@ -451,13 +454,15 @@ export async function rpcGitWorktreeList(
   return (await rpcGitWorktreeListWithMain(machineId, cwd)).worktrees;
 }
 
-/** A repo's linked worktrees plus where its main checkout is. `cwd` may be
- * any folder of the repo — a subfolder or a linked worktree — which is what
- * makes `mainPath` useful: it resolves whatever path the caller holds to the
- * repo root. `mainPath` is null on a daemon that predates the field. */
+/** A repo's linked worktrees plus where its main checkout is and what it has
+ * checked out. `cwd` may be any folder of the repo — a subfolder or a linked
+ * worktree — which is what makes `mainPath` useful: it resolves whatever path
+ * the caller holds to the repo root. `mainBranch` is `""` for a detached main
+ * checkout. Both are null on a daemon that predates the field. */
 export interface WorktreeListing {
   mainPath: string | null;
   mainDisplayPath: string | null;
+  mainBranch: string | null;
   worktrees: WorktreeInfo[];
 }
 
@@ -473,6 +478,7 @@ export async function rpcGitWorktreeListWithMain(
     mainPath: typeof result.main_path === 'string' ? result.main_path : null,
     mainDisplayPath:
       typeof result.main_display_path === 'string' ? result.main_display_path : null,
+    mainBranch: typeof result.main_branch === 'string' ? result.main_branch : null,
     worktrees: (result.worktrees as WorktreeInfo[]) ?? [],
   };
 }
